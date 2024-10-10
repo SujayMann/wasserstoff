@@ -252,5 +252,6 @@ while not pdf_queue.empty():
     except queue.Empty:
         break
 
-app.run(host='0.0.0.0', port=5000)
+port = os.getenv('PORT')
+app.run(host='0.0.0.0', port=port)
 print("Done.")
