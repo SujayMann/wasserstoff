@@ -17,7 +17,7 @@ This project is a PDF metadata extractor that downloads PDFs from specified URLs
 - **Pip**: Python package manager
 - **Git**: For cloning the repository
 - **NLTK**: Natural Language Toolkit for text processing (automatically downloaded)
-
+- **Flask**
 ## Installation
 
 1. **Clone the repository:**
