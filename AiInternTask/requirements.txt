@@ -8,3 +8,4 @@ sentencepiece
 psutil
 torch
 tensorflow
+Flask

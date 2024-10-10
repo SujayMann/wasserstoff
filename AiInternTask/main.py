@@ -14,13 +14,15 @@ import queue
 from timeit import default_timer as timer
 import psutil
 from typing import List
+from flask import Flask, request, jsonify
 
+app = Flask(__name__)
 
 # Download NLTK resources
 try:
-    nltk.download('punkt')
-    nltk.download('stopwords')
-    nltk.download('averaged_perceptron_tagger')
+    nltk.download('punkt', quiet=True)
+    nltk.download('stopwords', quiet=True)
+    nltk.download('averaged_perceptron_tagger', quiet=True)
 except Exception as e:
     print(f"Error downloading NLTK resources: {e}")
 
@@ -29,15 +31,18 @@ dir_name = 'downloads'
 if not os.path.exists(dir_name):
     os.mkdir(dir_name)
 
+# MongoDB connection
 uri = os.getenv('MONGODB_URI')
 
 # MongoDB Setup
 myclient = pymongo.MongoClient(uri)
 try:
     myclient.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("Connected to MongoDB.")
+
 except Exception as e:
     print(e)
+
 mydb = myclient['pdf_database']
 mycol = mydb['pdfs']
 
@@ -180,7 +185,7 @@ def update_data(id: str, summary: str, keywords: List) -> None:
     """
     try:
         mycol.update_one(
-            {'id': id},
+            {'_id': "_" + id},
             {"$set": {'summary': summary, 'keywords': keywords}}
         )
     except Exception as e:
@@ -188,7 +193,8 @@ def update_data(id: str, summary: str, keywords: List) -> None:
 
 
 # Process each PDF and update the DataBase
-def process_pdf(file_path: str) -> None:
+@app.route('/process', methods=['POST'])
+def process_pdf(file_path: str):
     """
     Combines the functions for summarizing, extracting keywords and updating the database.
     Also handles any error occurred and logs time taken and memory consumed.
@@ -197,7 +203,7 @@ def process_pdf(file_path: str) -> None:
         filepath: filepath of the pdf
 
     Returns:
-        None
+        Status Code
     """
     start_time = timer()
     memory_before = psutil.Process().memory_info().rss
@@ -227,6 +233,7 @@ def process_pdf(file_path: str) -> None:
 
         print(f"Processing Time for {file_path}: {total_time:.2f} seconds, Memory Used: {total_memory:.2f} MB")
 
+    return jsonify({'status':'complete'}), 200
 
 # PDF Queue
 pdf_queue = queue.Queue()
@@ -244,5 +251,5 @@ while not pdf_queue.empty():
         pdf_queue.task_done()
     except queue.Empty:
         break
-
+app.run()
 print("Done.")
