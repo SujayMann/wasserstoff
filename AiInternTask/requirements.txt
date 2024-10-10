@@ -1,0 +1,8 @@
+pymongo
+requests
+scikit-learn
+nltk
+PyPDF2
+transformers
+sentencepiece
+psutil
