@@ -251,6 +251,6 @@ while not pdf_queue.empty():
         pdf_queue.task_done()
     except queue.Empty:
         break
-        
-app.run()
+
+app.run(host='0.0.0.0', port=5000)
 print("Done.")
