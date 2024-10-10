@@ -6,5 +6,5 @@ PyPDF2
 transformers
 sentencepiece
 psutil
-pytorch
+torch
 tensorflow
