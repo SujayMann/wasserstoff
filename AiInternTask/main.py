@@ -193,7 +193,6 @@ def update_data(id: str, summary: str, keywords: List) -> None:
 
 
 # Process each PDF and update the DataBase
-@app.route('/process', methods=['POST'])
 def process_pdf(file_path: str):
     """
     Combines the functions for summarizing, extracting keywords and updating the database.
@@ -233,25 +232,27 @@ def process_pdf(file_path: str):
 
         print(f"Processing Time for {file_path}: {total_time:.2f} seconds, Memory Used: {total_memory:.2f} MB")
 
-    return jsonify({'status':'complete'}), 200
 
 # PDF Queue
-pdf_queue = queue.Queue()
-for pdf_file in os.listdir(dir_name):
-    if pdf_file.endswith('.pdf'):
-        pdf_queue.put(pdf_file)
+@app.route('/process', methods=['POST'])
+def process():
+    pdf_queue = queue.Queue()
+    for pdf_file in os.listdir(dir_name):
+        if pdf_file.endswith('.pdf'):
+            pdf_queue.put(pdf_file)
 
 
-# # process pdfs
-while not pdf_queue.empty():
-    try:
-        file_path = pdf_queue.get_nowait()
-        with semaphore:
-            process_pdf(file_path)
-        pdf_queue.task_done()
-    except queue.Empty:
-        break
+    # # process pdfs
+    while not pdf_queue.empty():
+        try:
+            file_path = pdf_queue.get_nowait()
+            with semaphore:
+                process_pdf(file_path)
+            pdf_queue.task_done()
+        except queue.Empty:
+            break
+    
+    return jsonify({'status':'complete'}), 200
 
-port = os.getenv('PORT')
-app.run(host='0.0.0.0', port=port)
+app.run(host='0.0.0.0', port=5000)
 print("Done.")
