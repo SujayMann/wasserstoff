@@ -255,6 +255,5 @@ def process():
     return jsonify({'status':'complete'}), 200
 
 port = os.getenv('PORT')
-print(port)
 app.run(host='0.0.0.0', port=port)
 print("Done.")
